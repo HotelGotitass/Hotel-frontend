@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Plus, Edit2, Trash2, Star } from 'lucide-react';
+import { AMENITY_ICONS, AmenityIcon } from '../../utils/amenityIcons';
 import { apiClient } from '../../utils/apiClient';
 import { useTranslation } from 'react-i18next';
 
@@ -110,7 +111,7 @@ export default function Amenities() {
         {amenities.map((am) => (
           <div key={am.id} className="bg-[#111] border border-white/10 rounded-xl p-5 hover:border-white/30 transition-all flex flex-col">
             <div className="w-12 h-12 bg-black/50 rounded-lg flex items-center justify-center text-2xl mb-4 border border-white/5">
-              {am.icon ? am.icon : <Star size={20} className="text-white/40" />}
+              {am.icon ? <AmenityIcon icon={am.icon} size={22} className="text-[#eca8d6]" /> : <Star size={20} className="text-white/40" />}
             </div>
             <h3 className="font-bold text-lg mb-2">{am.name}</h3>
             <p className="text-white/50 text-sm flex-1">{am.description}</p>
@@ -171,13 +172,26 @@ export default function Amenities() {
               </div>
               <div>
                 <label className="block text-sm text-white/60 mb-1">{t('amenities.icon')}</label>
-                <input
-                  type="text"
-                  value={formData.icon}
-                  onChange={e => setFormData({...formData, icon: e.target.value})}
-                  className="w-full bg-[#1a1a1a] border border-white/10 rounded-lg px-3 py-2 text-white focus:border-[#eca8d6]/50 outline-none"
-                  placeholder={t('amenities.icon_placeholder')}
-                />
+                {/* Selector visual: se guarda la clave del icono; los clientes lo ven en la web */}
+                <div className="grid grid-cols-7 gap-1.5 max-h-40 overflow-y-auto p-1 rounded-lg bg-[#1a1a1a] border border-white/10" role="radiogroup" aria-label={t('amenities.icon')}>
+                  {AMENITY_ICONS.map(({ key, Icon }) => (
+                    <button
+                      key={key}
+                      type="button"
+                      role="radio"
+                      aria-checked={formData.icon === key}
+                      title={t(`amenityIcons.${key}`)}
+                      aria-label={t(`amenityIcons.${key}`)}
+                      onClick={() => setFormData({ ...formData, icon: key })}
+                      className={`aspect-square rounded-md flex items-center justify-center transition-colors ${formData.icon === key ? 'bg-[#eca8d6] text-black' : 'text-white/60 hover:bg-white/10 hover:text-white'}`}
+                    >
+                      <Icon size={18} />
+                    </button>
+                  ))}
+                </div>
+                <p className="text-xs text-white/40 mt-1">
+                  {formData.icon ? <>{t('amenities.icon_selected')}: <span className="text-white/70">{t(`amenityIcons.${formData.icon}`, formData.icon)}</span></> : t('amenities.icon_hint')}
+                </p>
               </div>
               <div className="flex gap-3 pt-6">
                 <button

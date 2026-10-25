@@ -7,6 +7,7 @@ const resources = {
     translation: {
       // Hero
       "hero": {
+        "eyebrow": "Hotel boutique",
         "welcome": "Bienvenidos al",
         "hotel": "Hotel Gotitas.",
         "desc": "Desconecta del mundo. Relájate en habitaciones exclusivas con vistas panorámicas y disfruta de una atención de lujo 24/7.",
@@ -34,6 +35,9 @@ const resources = {
 
       // Navbar
       "nav": {
+        "open_menu": "Abrir menú",
+        "close_menu": "Cerrar menú",
+        "my_profile": "Mis datos personales",
         "home": "Inicio",
         "rooms": "Habitaciones",
         "experience": "Experiencia",
@@ -47,6 +51,9 @@ const resources = {
 
       // Footer
       "footer": {
+        "cta_title": "Tu habitación te espera.",
+        "explore": "Explorar",
+        "payments": "Pagos procesados de forma segura por Mercado Pago.",
         "terms": "Términos y Condiciones",
         "contact": "Contacto",
         "desc": "Una experiencia inolvidable en el corazón de la ciudad.",
@@ -57,6 +64,19 @@ const resources = {
 
       // Public Rooms
       "publicRooms": {
+        "amenities": "Comodidades",
+        "guests_count_one": "{{count}} huésped",
+        "guests_count_other": "{{count}} huéspedes",
+        "retry_hint": "Revisa tu conexión e inténtalo de nuevo en unos segundos.",
+        "no_rooms_hint": "Prueba con otras fechas o con menos huéspedes.",
+        "label": "Reserva directa",
+        "search_error": "Error al buscar disponibilidad",
+        "results": "{{count}} opción(es) disponibles · {{nights}} noche(s)",
+        "nights_count_one": "{{count}} noche",
+        "nights_count_other": "{{count}} noches",
+        "last_rooms_one": "¡Última habitación!",
+        "last_rooms_other": "Quedan {{count}}",
+        "total_stay": "Total estadía",
         "searcher": "Buscador",
         "checkin": "Check-in",
         "checkout": "Check-out",
@@ -101,6 +121,7 @@ const resources = {
 
       // Client
       "client": {
+        "back_to_site": "Volver a la web",
         "checkout_title": "Confirmar Reserva",
         "summary": "Resumen de Reserva",
         "room": "Habitación",
@@ -131,26 +152,71 @@ const resources = {
         "no_reservations": "No tienes reservas actualmente.",
         "cancelled_by": "Cancelada por",
         "modify_info": "Solo se permite una (1) modificación por reserva, hasta 48h antes del Check-In original. Sujeto a disponibilidad de la categoría. El precio total se recalculará.",
-        "redirect_payment": "Al confirmar, será redirigido a la pasarela de pago simulada.",
+        "redirect_payment": "Al confirmar, será redirigido a Mercado Pago para pagar de forma segura.",
         "account_summary": "Resumen de Cuenta",
         "loading": "Cargando reservas..."
       },
 
-      // Payment Gateway
-      "payment": {
-        "title": "MockPay Gateway",
-        "booking": "Reserva",
-        "approve_deposit": "Aprobar Adelanto",
-        "approve_full": "Aprobar Total",
-        "simulate_reject": "Simular Rechazo",
-        "processing": "Procesando...",
-        "success_title": "¡Pago Aprobado!",
-        "success_desc": "Tu reserva ha sido confirmada con éxito.",
-        "success_redirect": "Redirigiendo a tus reservas...",
-        "error_title": "Pago Rechazado",
-        "error_desc": "Hubo un problema procesando tu tarjeta o elegiste simular un rechazo.",
-        "error_redirect": "Serás redirigido al inicio...",
-        "disclaimer": "Este entorno es una simulación. No se realizan cargos reales a ninguna tarjeta. Al pulsar \"Aprobar\", se enviará un Webhook POST firmado al backend."
+      "home": {
+        "rooms_label": "Habitaciones",
+        "rooms_title": "Elige tu refugio",
+        "rooms_cta": "Ver disponibilidad",
+        "from": "Desde",
+        "info_label": "Reserva sin sorpresas",
+        "info_title": "Así funciona tu reserva",
+        "info_subtitle": "Reglas claras desde el primer clic. Lo que ves aquí es exactamente lo que aplicamos.",
+        "info_secure_t": "Pago seguro con Mercado Pago",
+        "info_secure_d": "Paga con tarjeta de crédito, débito u otros medios de Mercado Pago. Nunca vemos ni guardamos los datos de tu tarjeta.",
+        "info_deposit_t": "Reserva con el {{pct}}%",
+        "info_deposit_d": "Asegura tu habitación pagando el anticipo y cancela el saldo después o al llegar al hotel.",
+        "info_hold_t": "Habitación apartada 15 minutos",
+        "info_hold_d": "Al iniciar la reserva bloqueamos la habitación mientras completas el pago.",
+        "info_modify_t": "Cambia tus fechas una vez",
+        "info_modify_d": "Puedes modificar las fechas una vez, hasta 48 horas antes del check-in, sujeto a disponibilidad."
+      },
+
+      "checkout": {
+        "step_room": "Habitación",
+        "step_payment": "Pago",
+        "step_done": "Confirmación",
+        "how_pay": "¿Cuánto deseas pagar ahora?",
+        "option_deposit": "Anticipo {{pct}}%",
+        "option_deposit_hint": "El saldo ({{amount}}) lo pagas después o en el hotel.",
+        "option_full": "Pago total",
+        "option_full_hint": "Llega y disfruta, sin saldos pendientes.",
+        "pay_now": "Pagas hoy",
+        "pay_later": "Saldo pendiente",
+        "pay_with_mp": "Pagar con Mercado Pago",
+        "mp_notice": "Serás redirigido a Mercado Pago para completar el pago de forma segura. La habitación queda apartada por 15 minutos.",
+        "create_error": "No se pudo crear la reserva",
+        "see_reservation": "Ver la reserva en Mis Reservas para reintentar el pago"
+      },
+
+      "paymentResult": {
+        "verifying_title": "Confirmando tu pago…",
+        "verifying_desc": "Mercado Pago aprobó el pago. Estamos confirmando tu reserva.",
+        "success_title": "¡Reserva confirmada!",
+        "success_desc": "Recibimos tu pago. Te enviamos un correo con el detalle.",
+        "approved_pending_title": "Pago aprobado",
+        "approved_pending_desc": "La confirmación puede tardar unos minutos. La verás reflejada en Mis Reservas.",
+        "pending_title": "Pago en proceso",
+        "pending_desc": "Mercado Pago está procesando tu pago. Lo verás reflejado en Mis Reservas cuando se acredite.",
+        "error_title": "El pago no se completó",
+        "error_desc": "No se realizó ningún cargo. Puedes reintentar desde Mis Reservas mientras la reserva siga vigente.",
+        "go_reservations": "Ir a Mis Reservas"
+      },
+
+      "reservationsPage": {
+        "pay_within": "Paga en {{time}}",
+        "paid": "Pagado",
+        "balance": "Saldo",
+        "pay_balance": "Pagar saldo",
+        "new_booking": "Nueva reserva",
+        "cancelled_ok": "Reserva cancelada. Si realizaste un pago, recepción revisará tu reembolso.",
+        "cancel_error": "No se pudo cancelar la reserva",
+        "modified_ok": "Fechas actualizadas",
+        "modify_error": "No se pudieron modificar las fechas",
+        "invoice_missing": "La factura aún no ha sido emitida por el hotel."
       },
 
       // Status labels
@@ -324,6 +390,160 @@ const resources = {
       },
 
       // Invoices (admin)
+      "payments": {
+        "amount": "Monto",
+        "method": "Medio de pago",
+        "reference": "Referencia / N° de operación",
+        "reference_hint": "Ej. voucher POS, N° de operación Yape",
+        "register": "Registrar cobro",
+        "register_payment": "Registrar cobro",
+        "paid": "Pagado",
+        "balance": "Saldo",
+        "registered": "Cobro de S/ {{amount}} registrado en caja. Saldo: S/ {{balance}}.",
+        "methods": {
+          "CASH": "Efectivo",
+          "CREDIT_CARD": "Tarjeta de crédito",
+          "DEBIT_CARD": "Tarjeta de débito",
+          "TRANSFER": "Transferencia",
+          "YAPE_PLIN": "Yape / Plin",
+          "MERCADO_PAGO": "Mercado Pago",
+          "ONLINE_GATEWAY": "Pasarela en línea"
+        }
+      },
+
+      "cashGate": {
+        "title": "Abrir caja",
+        "greeting": "Hola, {{user}}",
+        "desc": "Para empezar tu turno abre la caja con el efectivo inicial que tienes en el cajón. Hasta entonces el panel no está disponible.",
+        "last_close": "Último cierre: {{user}} · {{time}} · contado {{counted}}",
+        "other_title": "Caja abierta por otra persona",
+        "other_desc": "{{user}} abrió la caja el {{time}} y aún no la cierra. Para empezar tu turno, debe cerrarla esa persona o un administrador.",
+        "must_close": "Tienes la caja abierta. Haz el arqueo y ciérrala para poder cerrar sesión."
+      },
+
+      "cash": {
+        "title": "Caja",
+        "subtitle": "Apertura, movimientos y cierre del turno de recepción",
+        "closed_title": "Caja cerrada",
+        "closed_desc": "Ábrela con el fondo inicial para empezar a cobrar.",
+        "opening_amount": "Fondo inicial",
+        "open_btn": "Abrir caja",
+        "open_title": "Caja abierta",
+        "opened_by": "Abierta por {{user}} · {{time}}",
+        "income": "Ingreso",
+        "expense": "Egreso",
+        "close_btn": "Cerrar caja",
+        "total_income": "Ingresos",
+        "total_expense": "Egresos",
+        "expected_cash": "Efectivo esperado",
+        "by_method": "Ingresos por medio de pago",
+        "no_income": "Aún no hay cobros en este turno.",
+        "expected_hint": "Efectivo esperado = fondo inicial + ingresos en efectivo − egresos en efectivo. Tarjeta, transferencia y Yape no van al cajón.",
+        "movements": "Movimientos del turno",
+        "no_movements": "Sin movimientos todavía.",
+        "history": "Turnos anteriores",
+        "opened": "Apertura",
+        "closed": "Cierre",
+        "counted": "Efectivo contado",
+        "difference": "Diferencia",
+        "no_history": "Aún no hay turnos cerrados.",
+        "income_title": "Registrar ingreso",
+        "expense_title": "Registrar egreso",
+        "concept": "Concepto",
+        "income_hint": "Ej. Venta de souvenir",
+        "expense_hint": "Ej. Compra de útiles de limpieza",
+        "save": "Guardar",
+        "close_title": "Cerrar caja (arqueo)",
+        "close_desc": "Cuenta el efectivo del cajón e ingrésalo. El sistema calcula si sobra o falta.",
+        "balanced": "Cuadrada",
+        "surplus": "Sobrante",
+        "shortage": "Faltante",
+        "notes": "Observaciones",
+        "confirm_close": "Cerrar caja",
+        "report_title": "Reporte de cierre"
+      },
+
+      "account": {
+        "title": "Mi cuenta",
+        "change_password": "Cambiar contraseña",
+        "current": "Contraseña actual",
+        "new": "Nueva contraseña",
+        "confirm": "Repite la nueva contraseña",
+        "rules": "Entre 8 y 72 caracteres.",
+        "mismatch": "Las contraseñas no coinciden",
+        "save": "Actualizar contraseña",
+        "changed": "Contraseña actualizada correctamente."
+      },
+
+      "amenityIcons": {
+        "wifi": "Wi-Fi",
+        "tv": "Televisión",
+        "ac": "Aire acondicionado",
+        "ventilation": "Ventilación",
+        "fan": "Ventilador",
+        "breakfast": "Desayuno",
+        "coffee": "Cafetera",
+        "restaurant": "Restaurante",
+        "minibar": "Minibar",
+        "fridge": "Refrigeradora",
+        "bathtub": "Tina",
+        "shower": "Ducha",
+        "pool": "Piscina",
+        "gym": "Gimnasio",
+        "spa": "Spa",
+        "parking": "Estacionamiento",
+        "safe": "Caja fuerte",
+        "phone": "Teléfono",
+        "view": "Vista panorámica",
+        "terrace": "Terraza",
+        "king_bed": "Cama king",
+        "room_service": "Room service",
+        "laundry": "Lavandería",
+        "pets": "Mascotas permitidas",
+        "kids": "Apto para niños",
+        "accessible": "Accesible",
+        "non_smoking": "No fumadores",
+        "cleaning": "Limpieza diaria"
+      },
+
+      "billing": {
+        "charged": "Comprobante {{number}} cobrado y registrado en caja.",
+        "charge_title": "Cobrar comprobante",
+        "charge_hint": "se cobra el saldo pendiente",
+        "title": "Facturación electrónica",
+        "subtitle": "Boletas, facturas y notas de crédito",
+        "simulated_notice": "Modo SIMULADO: los comprobantes se numeran y validan como en SUNAT, pero no se envían a SUNAT ni a ningún OSE/PSE y no tienen validez tributaria.",
+        "simulated": "simulado",
+        "emit": "Emitir comprobante",
+        "emit_btn": "Emitir",
+        "tab_all": "Todos",
+        "tab_void": "Anulados",
+        "boletas": "Boletas",
+        "facturas": "Facturas",
+        "boleta": "Boleta",
+        "factura": "Factura",
+        "search": "Número, cliente o reserva",
+        "document": "Comprobante",
+        "customer": "Cliente",
+        "issued": "Emisión",
+        "credit_note": "Nota de crédito",
+        "mark_paid": "Marcar como pagado",
+        "download": "Descargar PDF",
+        "void": "Anular",
+        "boleta_hint": "Consumidor final (DNI, CE o pasaporte)",
+        "factura_hint": "Empresa con RUC (crédito fiscal)",
+        "boleta_override": "Usar otros datos del cliente (por defecto, los del huésped)",
+        "from_guest": "Del huésped",
+        "doc_number": "N° de documento",
+        "business_name": "Razón social",
+        "fiscal_address": "Dirección fiscal",
+        "ruc_invalid": "RUC inválido: revisa los 11 dígitos (el dígito verificador no coincide).",
+        "void_title": "Anular comprobante",
+        "void_info": "Se emitirá una nota de crédito y podrás emitir un nuevo comprobante para la reserva.",
+        "void_reason": "Motivo de anulación",
+        "void_btn": "Anular con nota de crédito"
+      },
+
       "invoices": {
         "title": "Facturación y Pagos",
         "generate": "Generar Factura",
@@ -367,12 +587,14 @@ const resources = {
 
       // Amenities (admin)
       "amenities": {
+        "icon_selected": "Ícono elegido",
+        "icon_hint": "Elige el ícono que verán los clientes en la web.",
         "title": "Comodidades",
         "subtitle": "Gestiona las comodidades disponibles para las categorías.",
         "add": "Nueva Comodidad",
         "name": "Nombre",
         "description": "Descripción",
-        "icon": "Ícono (Emoji o Texto)",
+        "icon": "Ícono",
         "icon_placeholder": "Ej: 🏊",
         "no_amenities": "No hay comodidades registradas.",
         "add_title": "Nueva Comodidad",
@@ -382,6 +604,14 @@ const resources = {
 
       // Refunds (admin)
       "refunds": {
+        "method": "Medio",
+        "refund_method": "Medio de devolución",
+        "process_title": "Procesar reembolso",
+        "done_cash": "Reembolso de S/ {{amount}} entregado en efectivo y registrado como egreso de caja.",
+        "done_other": "Reembolso registrado como devuelto por {{method}}.",
+        "hint_cash": "Se descontará de la caja abierta como egreso. Requiere caja abierta con efectivo suficiente.",
+        "hint_mp": "Realiza la devolución desde tu panel de Mercado Pago y anota aquí el N° de operación.",
+        "hint_other": "No afecta el efectivo de la caja. Anota el N° de operación como respaldo.",
         "title": "Gestión de Reembolsos",
         "id": "ID",
         "booking_code": "Reserva (Cód)",
@@ -438,6 +668,7 @@ const resources = {
     translation: {
       // Hero
       "hero": {
+        "eyebrow": "Boutique hotel",
         "welcome": "Welcome to",
         "hotel": "Gotitas Hotel.",
         "desc": "Disconnect from the world. Relax in exclusive rooms with panoramic views and enjoy 24/7 luxury service.",
@@ -465,6 +696,9 @@ const resources = {
 
       // Navbar
       "nav": {
+        "open_menu": "Open menu",
+        "close_menu": "Close menu",
+        "my_profile": "My personal details",
         "home": "Home",
         "rooms": "Rooms",
         "experience": "Experience",
@@ -478,6 +712,9 @@ const resources = {
 
       // Footer
       "footer": {
+        "cta_title": "Your room is waiting.",
+        "explore": "Explore",
+        "payments": "Payments securely processed by Mercado Pago.",
         "terms": "Terms & Conditions",
         "contact": "Contact",
         "desc": "An unforgettable experience in the heart of the city.",
@@ -488,6 +725,19 @@ const resources = {
 
       // Public Rooms
       "publicRooms": {
+        "amenities": "Amenities",
+        "guests_count_one": "{{count}} guest",
+        "guests_count_other": "{{count}} guests",
+        "retry_hint": "Check your connection and try again in a few seconds.",
+        "no_rooms_hint": "Try different dates or fewer guests.",
+        "label": "Book direct",
+        "search_error": "Could not search availability",
+        "results": "{{count}} option(s) available · {{nights}} night(s)",
+        "nights_count_one": "{{count}} night",
+        "nights_count_other": "{{count}} nights",
+        "last_rooms_one": "Last room!",
+        "last_rooms_other": "Only {{count}} left",
+        "total_stay": "Stay total",
         "searcher": "Search",
         "checkin": "Check-in",
         "checkout": "Check-out",
@@ -532,6 +782,7 @@ const resources = {
 
       // Client
       "client": {
+        "back_to_site": "Back to website",
         "checkout_title": "Confirm Booking",
         "summary": "Booking Summary",
         "room": "Room",
@@ -562,26 +813,71 @@ const resources = {
         "no_reservations": "You have no reservations at the moment.",
         "cancelled_by": "Cancelled by",
         "modify_info": "Only one (1) modification is allowed per reservation, up to 48h before the original Check-In. Subject to category availability. The total price will be recalculated.",
-        "redirect_payment": "Upon confirmation, you will be redirected to the simulated payment gateway.",
+        "redirect_payment": "Upon confirmation, you will be redirected to Mercado Pago to pay securely.",
         "account_summary": "Account Summary",
         "loading": "Loading reservations..."
       },
 
-      // Payment Gateway
-      "payment": {
-        "title": "MockPay Gateway",
-        "booking": "Booking",
-        "approve_deposit": "Approve Deposit",
-        "approve_full": "Approve Total",
-        "simulate_reject": "Simulate Rejection",
-        "processing": "Processing...",
-        "success_title": "Payment Approved!",
-        "success_desc": "Your reservation has been successfully confirmed.",
-        "success_redirect": "Redirecting to your reservations...",
-        "error_title": "Payment Rejected",
-        "error_desc": "There was a problem processing your card or you chose to simulate a rejection.",
-        "error_redirect": "You will be redirected to the home page...",
-        "disclaimer": "This environment is a simulation. No real charges are made to any card. By clicking \"Approve\", a signed Webhook POST will be sent to the backend."
+      "home": {
+        "rooms_label": "Rooms",
+        "rooms_title": "Choose your retreat",
+        "rooms_cta": "Check availability",
+        "from": "From",
+        "info_label": "No-surprise booking",
+        "info_title": "How your booking works",
+        "info_subtitle": "Clear rules from the first click. What you see here is exactly what we apply.",
+        "info_secure_t": "Secure payment with Mercado Pago",
+        "info_secure_d": "Pay by credit card, debit card or other Mercado Pago methods. We never see or store your card details.",
+        "info_deposit_t": "Book with {{pct}}%",
+        "info_deposit_d": "Secure your room with a deposit and pay the balance later or at the hotel.",
+        "info_hold_t": "Room held for 15 minutes",
+        "info_hold_d": "When you start a booking we hold the room while you complete the payment.",
+        "info_modify_t": "Change your dates once",
+        "info_modify_d": "You can change your dates once, up to 48 hours before check-in, subject to availability."
+      },
+
+      "checkout": {
+        "step_room": "Room",
+        "step_payment": "Payment",
+        "step_done": "Confirmation",
+        "how_pay": "How much would you like to pay now?",
+        "option_deposit": "{{pct}}% deposit",
+        "option_deposit_hint": "Pay the balance ({{amount}}) later or at the hotel.",
+        "option_full": "Full payment",
+        "option_full_hint": "Arrive and relax, nothing left to pay.",
+        "pay_now": "Due today",
+        "pay_later": "Remaining balance",
+        "pay_with_mp": "Pay with Mercado Pago",
+        "mp_notice": "You will be redirected to Mercado Pago to pay securely. The room is held for 15 minutes.",
+        "create_error": "Could not create the reservation",
+        "see_reservation": "Open the reservation in My Reservations to retry the payment"
+      },
+
+      "paymentResult": {
+        "verifying_title": "Confirming your payment…",
+        "verifying_desc": "Mercado Pago approved the payment. We are confirming your reservation.",
+        "success_title": "Reservation confirmed!",
+        "success_desc": "We received your payment. A confirmation email is on its way.",
+        "approved_pending_title": "Payment approved",
+        "approved_pending_desc": "Confirmation may take a few minutes. You will see it in My Reservations.",
+        "pending_title": "Payment in process",
+        "pending_desc": "Mercado Pago is processing your payment. It will show in My Reservations once credited.",
+        "error_title": "Payment not completed",
+        "error_desc": "You were not charged. You can retry from My Reservations while the reservation is still active.",
+        "go_reservations": "Go to My Reservations"
+      },
+
+      "reservationsPage": {
+        "pay_within": "Pay within {{time}}",
+        "paid": "Paid",
+        "balance": "Balance",
+        "pay_balance": "Pay balance",
+        "new_booking": "New booking",
+        "cancelled_ok": "Reservation cancelled. If you made a payment, the front desk will review your refund.",
+        "cancel_error": "Could not cancel the reservation",
+        "modified_ok": "Dates updated",
+        "modify_error": "Could not change the dates",
+        "invoice_missing": "The invoice has not been issued by the hotel yet."
       },
 
       // Status labels
@@ -755,6 +1051,160 @@ const resources = {
       },
 
       // Invoices (admin)
+      "payments": {
+        "amount": "Amount",
+        "method": "Payment method",
+        "reference": "Reference / operation no.",
+        "reference_hint": "E.g. POS voucher, Yape operation no.",
+        "register": "Register payment",
+        "register_payment": "Register payment",
+        "paid": "Paid",
+        "balance": "Balance",
+        "registered": "Payment of S/ {{amount}} registered in the cash register. Balance: S/ {{balance}}.",
+        "methods": {
+          "CASH": "Cash",
+          "CREDIT_CARD": "Credit card",
+          "DEBIT_CARD": "Debit card",
+          "TRANSFER": "Bank transfer",
+          "YAPE_PLIN": "Yape / Plin",
+          "MERCADO_PAGO": "Mercado Pago",
+          "ONLINE_GATEWAY": "Online gateway"
+        }
+      },
+
+      "cashGate": {
+        "title": "Open cash register",
+        "greeting": "Hi, {{user}}",
+        "desc": "To start your shift, open the register with the starting cash in the drawer. The panel is unavailable until then.",
+        "last_close": "Last close: {{user}} · {{time}} · counted {{counted}}",
+        "other_title": "Register opened by someone else",
+        "other_desc": "{{user}} opened the register on {{time}} and has not closed it yet. To start your shift, that person or an administrator must close it.",
+        "must_close": "Your register is open. Count it and close it before signing out."
+      },
+
+      "cash": {
+        "title": "Cash register",
+        "subtitle": "Opening, movements and closing of the front-desk shift",
+        "closed_title": "Register closed",
+        "closed_desc": "Open it with the starting float to begin charging.",
+        "opening_amount": "Starting float",
+        "open_btn": "Open register",
+        "open_title": "Register open",
+        "opened_by": "Opened by {{user}} · {{time}}",
+        "income": "Income",
+        "expense": "Expense",
+        "close_btn": "Close register",
+        "total_income": "Income",
+        "total_expense": "Expenses",
+        "expected_cash": "Expected cash",
+        "by_method": "Income by payment method",
+        "no_income": "No payments in this shift yet.",
+        "expected_hint": "Expected cash = starting float + cash income − cash expenses. Card, transfer and Yape do not go into the drawer.",
+        "movements": "Shift movements",
+        "no_movements": "No movements yet.",
+        "history": "Previous shifts",
+        "opened": "Opened",
+        "closed": "Closed",
+        "counted": "Counted cash",
+        "difference": "Difference",
+        "no_history": "No closed shifts yet.",
+        "income_title": "Register income",
+        "expense_title": "Register expense",
+        "concept": "Concept",
+        "income_hint": "E.g. Souvenir sale",
+        "expense_hint": "E.g. Cleaning supplies",
+        "save": "Save",
+        "close_title": "Close register (count)",
+        "close_desc": "Count the cash in the drawer and enter it. The system calculates any surplus or shortage.",
+        "balanced": "Balanced",
+        "surplus": "Surplus",
+        "shortage": "Shortage",
+        "notes": "Notes",
+        "confirm_close": "Close register",
+        "report_title": "Closing report"
+      },
+
+      "account": {
+        "title": "My account",
+        "change_password": "Change password",
+        "current": "Current password",
+        "new": "New password",
+        "confirm": "Repeat new password",
+        "rules": "Between 8 and 72 characters.",
+        "mismatch": "Passwords do not match",
+        "save": "Update password",
+        "changed": "Password updated successfully."
+      },
+
+      "amenityIcons": {
+        "wifi": "Wi-Fi",
+        "tv": "Television",
+        "ac": "Air conditioning",
+        "ventilation": "Ventilation",
+        "fan": "Fan",
+        "breakfast": "Breakfast",
+        "coffee": "Coffee maker",
+        "restaurant": "Restaurant",
+        "minibar": "Minibar",
+        "fridge": "Fridge",
+        "bathtub": "Bathtub",
+        "shower": "Shower",
+        "pool": "Pool",
+        "gym": "Gym",
+        "spa": "Spa",
+        "parking": "Parking",
+        "safe": "Safe",
+        "phone": "Phone",
+        "view": "Panoramic view",
+        "terrace": "Terrace",
+        "king_bed": "King bed",
+        "room_service": "Room service",
+        "laundry": "Laundry",
+        "pets": "Pets allowed",
+        "kids": "Kid friendly",
+        "accessible": "Accessible",
+        "non_smoking": "Non-smoking",
+        "cleaning": "Daily cleaning"
+      },
+
+      "billing": {
+        "charged": "Document {{number}} charged and registered in the cash register.",
+        "charge_title": "Charge document",
+        "charge_hint": "the outstanding balance is charged",
+        "title": "Electronic invoicing",
+        "subtitle": "Receipts, invoices and credit notes",
+        "simulated_notice": "SIMULATED mode: documents are numbered and validated like SUNAT, but they are not sent to SUNAT or any OSE/PSE and have no tax validity.",
+        "simulated": "simulated",
+        "emit": "Issue document",
+        "emit_btn": "Issue",
+        "tab_all": "All",
+        "tab_void": "Voided",
+        "boletas": "Receipts",
+        "facturas": "Invoices",
+        "boleta": "Receipt",
+        "factura": "Invoice",
+        "search": "Number, customer or booking",
+        "document": "Document",
+        "customer": "Customer",
+        "issued": "Issued",
+        "credit_note": "Credit note",
+        "mark_paid": "Mark as paid",
+        "download": "Download PDF",
+        "void": "Void",
+        "boleta_hint": "Final consumer (DNI, CE or passport)",
+        "factura_hint": "Company with RUC (tax credit)",
+        "boleta_override": "Use other customer details (defaults to the guest)",
+        "from_guest": "From guest",
+        "doc_number": "Document no.",
+        "business_name": "Business name",
+        "fiscal_address": "Tax address",
+        "ruc_invalid": "Invalid RUC: check the 11 digits (check digit does not match).",
+        "void_title": "Void document",
+        "void_info": "A credit note will be issued and you can issue a new document for the booking.",
+        "void_reason": "Reason for voiding",
+        "void_btn": "Void with credit note"
+      },
+
       "invoices": {
         "title": "Billing & Payments",
         "generate": "Generate Invoice",
@@ -798,12 +1248,14 @@ const resources = {
 
       // Amenities (admin)
       "amenities": {
+        "icon_selected": "Selected icon",
+        "icon_hint": "Choose the icon guests will see on the website.",
         "title": "Amenities",
         "subtitle": "Manage available amenities for room categories.",
         "add": "New Amenity",
         "name": "Name",
         "description": "Description",
-        "icon": "Icon (Emoji or Text)",
+        "icon": "Icon",
         "icon_placeholder": "E.g: 🏊",
         "no_amenities": "No amenities registered.",
         "add_title": "New Amenity",
@@ -813,6 +1265,14 @@ const resources = {
 
       // Refunds (admin)
       "refunds": {
+        "method": "Method",
+        "refund_method": "Refund method",
+        "process_title": "Process refund",
+        "done_cash": "Refund of S/ {{amount}} paid in cash and recorded as a cash register expense.",
+        "done_other": "Refund recorded as returned via {{method}}.",
+        "hint_cash": "It will be deducted from the open register as an expense. Requires an open register with enough cash.",
+        "hint_mp": "Issue the refund from your Mercado Pago dashboard and enter the operation number here.",
+        "hint_other": "Does not affect register cash. Enter the operation number as proof.",
         "title": "Refund Management",
         "id": "ID",
         "booking_code": "Booking (Code)",

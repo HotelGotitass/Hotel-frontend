@@ -1,215 +1,178 @@
 import { apiClient } from '../utils/apiClient';
 import React, { useState, useEffect } from 'react';
-import TranslatedText from './TranslatedText';
 import { Helmet } from 'react-helmet';
-import { BedDouble, Users, Calendar } from 'lucide-react';
+import { BedDouble, Users, Moon, ArrowRight, AlertCircle } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import BookingBar from './BookingBar';
+import { formatMoney, nightsBetween } from '../utils/payments';
+import { AmenityIcon } from '../utils/amenityIcons';
 
 export default function PublicRooms() {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+
+  // La busqueda vive en la URL: se puede compartir, recargar y viene prellenada desde el Hero
+  const checkIn = searchParams.get('checkIn') || '';
+  const checkOut = searchParams.get('checkOut') || '';
+  const guests = Number(searchParams.get('guests') || 1);
+  const hasSearched = Boolean(checkIn && checkOut);
+  const nights = nightsBetween(checkIn, checkOut);
+
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(false);
-  const { t, i18n } = useTranslation();
-  const navigate = useNavigate();
-
-  // Helper para texto según idioma
-  const getTranslated = (esText, enText) => {
-    if (i18n.language.startsWith('en') && enText) {
-      return enText;
-    }
-    return esText;
-  };
-
-  // Search state
-  const [checkIn, setCheckIn] = useState('');
-  const [checkOut, setCheckOut] = useState('');
-  const [capacity, setCapacity] = useState(1);
-  const [hasSearched, setHasSearched] = useState(false);
   const [searchError, setSearchError] = useState('');
 
+  useEffect(() => {
+    if (!hasSearched) return;
+    setLoading(true);
+    setSearchError('');
+    apiClient(`/rooms/search?checkIn=${checkIn}&checkOut=${checkOut}`)
+      .then(async (res) => {
+        const data = await res.json().catch(() => null);
+        if (!res.ok) throw new Error(data?.message || t('publicRooms.search_error'));
+        return data;
+      })
+      .then((data) => setCategories(data.filter((cat) => cat.maxCapacity >= guests && cat.availableRooms > 0)))
+      .catch((err) => {
+        setCategories([]);
+        setSearchError(err.message === 'Failed to fetch' ? t('publicRooms.search_error') : err.message);
+      })
+      .finally(() => setLoading(false));
+  }, [checkIn, checkOut, guests, hasSearched, t]);
+
   const handleReservar = (cat) => {
-    // BUG FIX: La clave era 'bookingData' en PublicRooms pero Checkout.jsx la leía como 'bookingDetails'
-    // Ahora ambos usan 'bookingDetails'
     sessionStorage.setItem('bookingDetails', JSON.stringify({
       checkIn,
       checkOut,
-      capacity,
+      capacity: guests,
       categoryId: cat.categoryId,
-      categoryName: getTranslated(cat.name, cat.nameEn),
+      categoryName: cat.name,
       basePrice: cat.basePrice,
-      imageUrl: cat.imageUrl
+      imageUrl: cat.imageUrl,
     }));
     navigate('/checkout');
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (!checkIn || !checkOut) return;
-    
-    setLoading(true);
-    setHasSearched(true);
-    setSearchError('');
-
-    // BUG FIX: URL correcta es /rooms/search?checkIn=...&checkOut=... (sin /public/search)
-    apiClient(`/rooms/search?checkIn=${checkIn}&checkOut=${checkOut}`)
-      .then(res => {
-        if (!res.ok) throw new Error('Error al buscar disponibilidad');
-        return res.json();
-      })
-      .then(data => {
-        // Filtrar por capacidad en frontend
-        const filtered = data.filter(cat => cat.maxCapacity >= parseInt(capacity));
-        setCategories(filtered);
-      })
-      .catch(err => {
-        console.error(err);
-        setSearchError(err.message);
-      })
-      .finally(() => setLoading(false));
-  };
+  const StateBox = ({ icon: Icon, children, tone = 'muted' }) => (
+    <div className={`flex flex-col items-center justify-center text-center py-24 border-t border-ink-900/15 ${tone === 'error' ? 'text-red-800' : 'text-ink-900/50'}`}>
+      <Icon size={40} strokeWidth={1.25} className="mb-5" />
+      <div className="max-w-md">{children}</div>
+    </div>
+  );
 
   return (
-    <section className="bg-black relative z-10 min-h-screen">
+    <>
       <Helmet>
         <title>{t('nav.rooms')} | Hotel Gotitas</title>
       </Helmet>
-      <div className="max-w-[1400px] mx-auto px-6 lg:px-12">
-        <div className="mb-12 pt-28">
-          <h1 className="text-5xl font-bold text-white mb-4 animate-text-glow">{t('nav.rooms')}</h1>
+
+      <section className="bg-ink-900 pt-12 pb-16 lg:pb-20">
+        <div className="max-w-[1400px] mx-auto px-5 lg:px-10">
+          <span className="eyebrow text-sand mb-6">
+            <span className="w-10 h-px bg-sand/60" />
+            {t('publicRooms.label')}
+          </span>
+          <h1 className="font-display text-6xl md:text-8xl font-medium leading-[0.9] mb-12">{t('nav.rooms')}</h1>
+          <BookingBar key={`${checkIn}-${checkOut}-${guests}`} initial={hasSearched ? { checkIn, checkOut, guests } : {}} />
         </div>
+      </section>
 
-        <div className="flex flex-col lg:flex-row gap-10 pb-20">
-          
-          {/* Search Sidebar */}
-          <aside className="lg:w-1/3 shrink-0">
-            <div className="bg-[#0a0a0a] border border-white/5 rounded-3xl p-8 sticky top-28 shadow-2xl">
-              <h3 className="text-xl font-bold text-white mb-6">{t("publicRooms.searcher")}</h3>
-              
-              <form onSubmit={handleSearch} className="space-y-6">
-                <div>
-                  <label className="text-white/60 text-sm mb-2 block">{t("publicRooms.checkin")}</label>
-                  <div className="relative">
-                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={18} />
-                    <input 
-                      type="date" 
-                      required
-                      value={checkIn}
-                      min={new Date().toISOString().split('T')[0]}
-                      onChange={(e) => setCheckIn(e.target.value)}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-white/30"
-                    />
+      <section className="bg-ivory text-ink-900 min-h-[50vh] py-16 lg:py-24">
+        <div className="max-w-[1400px] mx-auto px-5 lg:px-10">
+          {loading ? (
+            <div className="space-y-12" aria-busy="true" aria-label={t('publicRooms.loading')}>
+              {[0, 1].map((i) => (
+                <div key={i} className="grid lg:grid-cols-12 gap-8 border-t border-ink-900/15 pt-10">
+                  <div className="lg:col-span-5 aspect-[4/3] rounded-2xl bg-ivory-200 animate-pulse" />
+                  <div className="lg:col-span-7 space-y-4">
+                    <div className="h-10 w-1/2 rounded bg-ivory-200 animate-pulse" />
+                    <div className="h-4 w-full rounded bg-ivory-200 animate-pulse" />
+                    <div className="h-4 w-2/3 rounded bg-ivory-200 animate-pulse" />
                   </div>
                 </div>
-
-                <div>
-                  <label className="text-white/60 text-sm mb-2 block">{t("publicRooms.checkout")}</label>
-                  <div className="relative">
-                    <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={18} />
-                    <input 
-                      type="date" 
-                      required
-                      value={checkOut}
-                      min={checkIn || new Date().toISOString().split('T')[0]}
-                      onChange={(e) => setCheckOut(e.target.value)}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-white/30"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="text-white/60 text-sm mb-2 block">{t("publicRooms.guests")}</label>
-                  <div className="relative">
-                    <Users className="absolute left-4 top-1/2 -translate-y-1/2 text-white/40" size={18} />
-                    <input 
-                      type="number" 
-                      min="1"
-                      required
-                      value={capacity}
-                      onChange={(e) => setCapacity(e.target.value)}
-                      className="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:outline-none focus:border-white/30"
-                    />
-                  </div>
-                </div>
-
-                <button type="submit" className="w-full bg-white text-black py-4 rounded-xl font-bold hover:bg-white/90 transition-colors">
-                  {t("publicRooms.search")}
-                </button>
-              </form>
+              ))}
             </div>
-          </aside>
-
-          {/* Results */}
-          <div className="lg:w-2/3">
-            {loading ? (
-              <div className="flex items-center justify-center h-64">
-                <div className="text-white/60 text-lg animate-pulse">{t("publicRooms.loading")}</div>
-              </div>
-            ) : searchError ? (
-              <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-6 rounded-2xl">
-                {searchError}
-              </div>
-            ) : hasSearched && categories.length === 0 ? (
-              <div className="flex flex-col items-center justify-center h-64 text-white/40">
-                <BedDouble size={48} className="mb-4 opacity-50" />
-                <p className="text-lg">{t("publicRooms.no_rooms")}</p>
-              </div>
-            ) : hasSearched ? (
-              <div className="grid gap-6">
+          ) : searchError ? (
+            <StateBox icon={AlertCircle} tone="error">
+              <p className="font-display text-3xl mb-2">{searchError}</p>
+              <p className="text-sm text-ink-900/50">{t('publicRooms.retry_hint')}</p>
+            </StateBox>
+          ) : hasSearched && categories.length === 0 ? (
+            <StateBox icon={BedDouble}>
+              <p className="font-display text-3xl text-ink-900 mb-2">{t('publicRooms.no_rooms')}</p>
+              <p className="text-sm">{t('publicRooms.no_rooms_hint')}</p>
+            </StateBox>
+          ) : hasSearched ? (
+            <>
+              <p className="text-[11px] uppercase tracking-label text-ink-900/50 mb-8">
+                {t('publicRooms.results', { count: categories.length, nights })}
+              </p>
+              <div>
                 {categories.map((cat, idx) => (
-                  <div key={idx} className="bg-[#0a0a0a] border border-white/5 rounded-3xl overflow-hidden flex flex-col md:flex-row hover:border-white/20 transition-all">
-                    {cat.imageUrl && (
-                      <div className="md:w-56 h-48 md:h-auto flex-shrink-0 overflow-hidden">
-                        <img
-                          src={cat.imageUrl}
-                          alt={getTranslated(cat.name, cat.nameEn)}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                    <div className="flex-1 p-6 flex flex-col justify-between">
-                      <div>
-                        <h4 className="text-2xl font-bold text-white mb-2">
-                          {getTranslated(cat.name, cat.nameEn)}
-                        </h4>
-                        <p className="text-white/60 text-sm line-clamp-2 mb-4">
-                          {getTranslated(cat.description, cat.descriptionEn)}
-                        </p>
-                        <div className="flex gap-4 text-sm text-white/40">
-                          <span className="flex items-center gap-1">
-                            <Users size={14}/> {t('publicRooms.max_persons', { count: cat.maxCapacity })}
+                  <article key={cat.categoryId} className="grid lg:grid-cols-12 gap-8 lg:gap-12 border-t border-ink-900/15 py-10 lg:py-14">
+                    <div className="lg:col-span-5 relative aspect-[4/3] overflow-hidden rounded-2xl bg-ivory-200">
+                      {cat.imageUrl ? (
+                        <img src={cat.imageUrl} alt={cat.name} loading="lazy" className="absolute inset-0 w-full h-full object-cover" />
+                      ) : (
+                        <div className="absolute inset-0 flex items-center justify-center text-ink-900/20"><BedDouble size={56} /></div>
+                      )}
+                      <span className="absolute top-4 left-4 section-num text-xl bg-ivory/90 rounded-full w-11 h-11 flex items-center justify-center">
+                        {String(idx + 1).padStart(2, '0')}
+                      </span>
+                    </div>
+
+                    <div className="lg:col-span-7 flex flex-col">
+                      <div className="flex flex-wrap items-start justify-between gap-3">
+                        <h2 className="font-display text-4xl md:text-5xl font-medium leading-tight">{cat.name}</h2>
+                        {cat.availableRooms <= 2 && (
+                          <span className="text-[11px] uppercase tracking-label px-3 py-1.5 rounded-full bg-accent/25 text-accent-deep font-semibold">
+                            {t('publicRooms.last_rooms', { count: cat.availableRooms })}
                           </span>
-                          <span className="flex items-center gap-1">
-                            <BedDouble size={14}/> {cat.availableRooms} {cat.availableRooms === 1 ? 'disponible' : 'disponibles'}
-                          </span>
-                        </div>
+                        )}
                       </div>
-                      <div className="flex items-end justify-between mt-6">
+                      <p className="text-ink-900/60 leading-relaxed mt-4 max-w-xl">{cat.description}</p>
+                      {cat.amenities?.length > 0 && (
+                        <ul className="flex flex-wrap gap-2 mt-5" aria-label={t('publicRooms.amenities')}>
+                          {cat.amenities.map((a) => (
+                            <li key={a.id} className="inline-flex items-center gap-1.5 rounded-full border border-ink-900/15 bg-ivory-100 px-3 py-1.5 text-xs text-ink-900/75">
+                              <AmenityIcon icon={a.icon} size={14} className="text-sand-deep" /> {a.name}
+                            </li>
+                          ))}
+                        </ul>
+                      )}
+                      <div className="flex flex-wrap gap-6 text-sm text-ink-900/55 mt-6">
+                        <span className="flex items-center gap-2"><Users size={16} strokeWidth={1.5} /> {t('publicRooms.max_persons', { count: cat.maxCapacity })}</span>
+                        <span className="flex items-center gap-2"><Moon size={16} strokeWidth={1.5} /> {t('publicRooms.nights_count', { count: nights })}</span>
+                      </div>
+
+                      <div className="mt-auto pt-10 flex flex-wrap items-end justify-between gap-6">
                         <div>
-                          <span className="text-white text-3xl font-bold">
-                            S/ {cat.basePrice?.toFixed ? cat.basePrice.toFixed(2) : cat.basePrice}
-                          </span>
-                          <span className="text-sm font-normal text-white/40 ml-1">{t('publicRooms.per_night')}</span>
+                          <div className="flex items-baseline gap-2">
+                            <span className="font-display text-5xl font-semibold">{formatMoney(cat.basePrice)}</span>
+                            <span className="text-sm text-ink-900/50">{t('publicRooms.per_night')}</span>
+                          </div>
+                          <div className="text-sm text-ink-900/60 mt-1">
+                            {t('publicRooms.total_stay')}: <strong className="text-ink-900">{formatMoney(cat.basePrice * nights)}</strong>
+                          </div>
                         </div>
-                        <button
-                          onClick={() => handleReservar(cat)}
-                          className="px-8 py-3 bg-white text-black rounded-full font-semibold hover:bg-[#eca8d6] transition-colors"
-                        >
-                          {t('publicRooms.book')}
+                        <button onClick={() => handleReservar(cat)} className="btn-dark px-8 group">
+                          {t('publicRooms.book')} <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                         </button>
                       </div>
                     </div>
-                  </div>
+                  </article>
                 ))}
               </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-64 text-white/40">
-                <BedDouble size={48} className="mx-auto mb-4 opacity-50" />
-                <p className="text-center">{t("publicRooms.select_dates")}</p>
-              </div>
-            )}
-          </div>
+            </>
+          ) : (
+            <StateBox icon={BedDouble}>
+              <p className="font-display text-3xl text-ink-900">{t('publicRooms.select_dates')}</p>
+            </StateBox>
+          )}
         </div>
-      </div>
-    </section>
+      </section>
+    </>
   );
 }

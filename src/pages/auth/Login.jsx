@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { AlertCircle, ArrowLeft, Hotel } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -9,8 +9,13 @@ export default function Login() {
   const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
+  // Motivo del cierre de sesion (cuenta deshabilitada, sesion cerrada por el admin, expirada)
+  const [error, setError] = useState(() => sessionStorage.getItem('authMessage') || '');
   const [isUnverified, setIsUnverified] = useState(false);
+
+  useEffect(() => {
+    sessionStorage.removeItem('authMessage');
+  }, []);
   const [loading, setLoading] = useState(false);
   
   const navigate = useNavigate();

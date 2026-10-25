@@ -7,7 +7,7 @@ export default function HabitacionesPage() {
   return (
     <div className="bg-black min-h-screen text-white flex flex-col">
       <Navbar />
-      <main className="flex-1 pt-24 pb-12">
+      <main className="flex-1 pt-24">
         <PublicRooms />
       </main>
       <Footer />

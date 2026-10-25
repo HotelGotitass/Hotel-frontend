@@ -1,12 +1,14 @@
 ﻿import React from 'react';
-import { Navigate, Outlet } from 'react-router-dom';
+import { Navigate, Outlet, useLocation } from 'react-router-dom';
 
 export default function ProtectedRoute({ allowedRoles }) {
+  const location = useLocation();
   const token = localStorage.getItem('token');
   const role = localStorage.getItem('role');
-  
+
   if (!token) {
-    return <Navigate to="/login" replace />;
+    // Login.jsx usa state.from para volver aqui (p. ej. /checkout) tras iniciar sesion
+    return <Navigate to="/login" replace state={{ from: location }} />;
   }
 
   if (allowedRoles && allowedRoles.length > 0) {
@@ -15,6 +17,6 @@ export default function ProtectedRoute({ allowedRoles }) {
       return <Navigate to="/" replace />;
     }
   }
-  
+
   return <Outlet />;
 }

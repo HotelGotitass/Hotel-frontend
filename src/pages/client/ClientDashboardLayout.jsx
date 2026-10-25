@@ -1,68 +1,74 @@
 import React from 'react';
-import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
+import { Outlet, Link, useLocation } from 'react-router-dom';
 import { CalendarCheck, User, LogOut, ArrowLeft } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../context/AuthContext';
 
 export default function ClientDashboardLayout() {
   const location = useLocation();
-  const navigate = useNavigate();
   const { t } = useTranslation();
   const { logout } = useAuth();
 
   const navItems = [
-    { path: '/client/reservations', label: t('nav.my_reservations', 'Mis Reservas'), icon: <CalendarCheck size={20} /> },
-    { path: '/client/profile', label: t('nav.my_profile', 'Mis Datos Personales'), icon: <User size={20} /> }
+    { path: '/client/reservations', label: t('nav.my_reservations', 'Mis Reservas'), icon: CalendarCheck },
+    { path: '/client/profile', label: t('nav.my_profile', 'Mis Datos Personales'), icon: User }
   ];
 
   return (
-    <div className="min-h-screen bg-black text-white flex">
-      {/* Sidebar para cliente */}
-      <aside className="w-64 border-r border-white/10 bg-[#050505] flex flex-col flex-shrink-0 min-h-screen">
-        <div className="p-6 flex items-center justify-between border-b border-white/10">
-          <Link to="/" className="flex items-center gap-3">
-             <img src="/logo.png" alt="Logo" className="h-8 object-contain" />
-             <span className="font-bold text-lg tracking-wider uppercase text-white hover:text-[#eca8d6] transition-colors">Gotitas</span>
+    <div className="min-h-screen bg-ink-900 text-ivory md:flex">
+      {/* Desktop: barra lateral. Movil: cabecera con pestanas */}
+      <aside className="md:w-64 md:min-h-screen md:border-r border-b md:border-b-0 border-ivory/10 bg-ink-950 flex md:flex-col shrink-0">
+        <div className="px-5 md:px-6 py-4 md:py-6 flex items-center justify-between md:border-b border-ivory/10 flex-1 md:flex-none">
+          <Link to="/" className="flex items-center gap-2.5">
+            <img src="/logo.png" alt="" className="h-7 object-contain" />
+            <span className="font-display text-xl font-semibold tracking-[0.12em] uppercase">Gotitas</span>
           </Link>
+          <button onClick={() => logout()} className="md:hidden w-11 h-11 flex items-center justify-center text-ivory/60" aria-label={t('admin.logout', 'Salir de mi cuenta')}>
+            <LogOut size={18} />
+          </button>
         </div>
 
-        <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-          {navItems.map((item) => {
-            const isActive = location.pathname.startsWith(item.path);
+        <nav className="hidden md:block flex-1 p-4 space-y-1">
+          {navItems.map(({ path, label, icon: Icon }) => {
+            const isActive = location.pathname.startsWith(path);
             return (
               <Link
-                key={item.path}
-                to={item.path}
-                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                  isActive 
-                    ? 'bg-[#eca8d6] text-black font-semibold shadow-[0_0_15px_rgba(236,168,214,0.3)]' 
-                    : 'text-white/60 hover:text-white hover:bg-white/5'
-                }`}
+                key={path}
+                to={path}
+                aria-current={isActive ? 'page' : undefined}
+                className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm transition-colors ${isActive ? 'bg-ivory text-ink-900 font-semibold' : 'text-ivory/60 hover:text-ivory hover:bg-ivory/5'}`}
               >
-                {item.icon}
-                {item.label}
+                <Icon size={18} strokeWidth={1.75} /> {label}
               </Link>
             );
           })}
         </nav>
 
-        <div className="p-4 border-t border-white/10">
-          <Link to="/" className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-white/60 hover:text-white hover:bg-white/5 transition-all mb-2">
-            <ArrowLeft size={20} /> Volver a la web
+        <div className="hidden md:block p-4 border-t border-ivory/10 space-y-1">
+          <Link to="/" className="flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-ivory/60 hover:text-ivory hover:bg-ivory/5 transition-colors">
+            <ArrowLeft size={18} /> {t('client.back_to_site', 'Volver a la web')}
           </Link>
-          <button 
-            onClick={() => logout()}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-red-400 hover:text-red-300 hover:bg-red-400/10 transition-all font-medium"
-          >
-            <LogOut size={20} /> {t('admin.logout', 'Salir de mi cuenta')}
+          <button onClick={() => logout()} className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm text-accent hover:bg-accent/10 transition-colors">
+            <LogOut size={18} /> {t('admin.logout', 'Salir de mi cuenta')}
           </button>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <main className="flex-1 overflow-auto bg-[#0a0a0a]">
-        <div className="p-8 max-w-6xl mx-auto">
-           <Outlet />
+      <nav className="md:hidden flex gap-2 px-5 py-3 border-b border-ivory/10 overflow-x-auto">
+        {navItems.map(({ path, label, icon: Icon }) => {
+          const isActive = location.pathname.startsWith(path);
+          return (
+            <Link key={path} to={path} aria-current={isActive ? 'page' : undefined}
+              className={`flex items-center gap-2 px-4 min-h-[40px] rounded-full text-sm whitespace-nowrap ${isActive ? 'bg-ivory text-ink-900 font-semibold' : 'text-ivory/60 border border-ivory/15'}`}>
+              <Icon size={16} /> {label}
+            </Link>
+          );
+        })}
+      </nav>
+
+      <main className="flex-1 min-w-0">
+        <div className="px-5 py-8 md:p-10 max-w-5xl mx-auto">
+          <Outlet />
         </div>
       </main>
     </div>

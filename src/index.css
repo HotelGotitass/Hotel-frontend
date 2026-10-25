@@ -4,38 +4,112 @@
 
 @layer base {
   :root {
-    --background: #000000;
-    --foreground: #ffffff;
+    --background: #0e0c0b;
+    --foreground: #f5efe6;
     --accent: #eca8d6;
     --accent-hover: #f5b5d8;
+    --ivory: #f5efe6;
+    --ink: #0e0c0b;
   }
-  
+
   body {
-    @apply antialiased text-white bg-black selection:bg-white/20;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    @apply antialiased text-ivory bg-ink-900 font-sans selection:bg-accent/30;
   }
-  
+
   html {
     scroll-behavior: smooth;
+  }
+
+  input[type="date"]::-webkit-calendar-picker-indicator {
+    opacity: 0.55;
+    cursor: pointer;
+  }
+  /* En fondos oscuros el icono del date picker se invierte */
+  .dark-picker input[type="date"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+  }
+
+  :focus-visible {
+    @apply outline-none ring-2 ring-accent ring-offset-2 ring-offset-ink-900;
+  }
+}
+
+@layer components {
+  /* Botones pill con alto minimo de 44px para toque */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 min-h-[44px] px-6 py-3 rounded-full bg-ivory text-ink-900
+           font-medium tracking-wide hover:bg-accent transition-colors duration-300
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-dark {
+    @apply inline-flex items-center justify-center gap-2 min-h-[44px] px-6 py-3 rounded-full bg-ink-900 text-ivory
+           font-medium tracking-wide hover:bg-accent-deep transition-colors duration-300
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-accent {
+    @apply inline-flex items-center justify-center gap-2 min-h-[44px] px-6 py-3 rounded-full bg-accent text-ink-900
+           font-semibold tracking-wide hover:bg-ivory transition-colors duration-300
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 min-h-[44px] px-6 py-3 rounded-full border
+           border-ivory/20 text-ivory/80 hover:border-ivory/60 hover:text-ivory transition-colors
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-ghost-dark {
+    @apply inline-flex items-center justify-center gap-2 min-h-[44px] px-6 py-3 rounded-full border border-ink-900/20
+           text-ink-900/80 hover:border-ink-900 hover:text-ink-900 transition-colors;
+  }
+
+  .input-field {
+    @apply w-full bg-ivory/5 border border-ivory/10 rounded-xl py-3 px-4 text-ivory placeholder-ivory/30
+           focus:outline-none focus:border-accent/60 transition-colors;
+  }
+
+  .card {
+    @apply bg-ink-800 border border-ivory/10 rounded-2xl;
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-3 text-[11px] font-medium uppercase tracking-label;
+  }
+
+  .section-num {
+    @apply font-display italic text-sand;
+  }
+
+  /* --- Ticket / tarjeta-llave: el detalle de identidad --- */
+  .ticket {
+    @apply relative bg-ivory text-ink-900 rounded-[22px];
+  }
+
+  .ticket-dark {
+    @apply relative bg-ink-800 text-ivory rounded-[22px] border border-ivory/10;
+  }
+
+  /* Muescas semicirculares en los extremos de la linea perforada */
+  .notch {
+    @apply absolute w-6 h-6 rounded-full bg-ink-900;
   }
 }
 
 @layer utilities {
   .glass-nav {
-    @apply bg-black/50 backdrop-blur-md border-b border-white/10;
-  }
-  
-  .card-hover {
-    @apply hover:border-white/30 transition-all duration-500 ease-out;
+    @apply bg-ink-900/80 backdrop-blur-xl border-b border-ivory/10;
   }
 
-  .mask-dots {
-    mask-image: radial-gradient(circle, white 2px, transparent 2.5px);
-    mask-size: 3vw 3vw;
-    -webkit-mask-image: radial-gradient(circle, white 2px, transparent 2.5px);
-    -webkit-mask-size: 3vw 3vw;
+  .card-hover {
+    @apply hover:border-ivory/25 transition-colors duration-500 ease-out;
   }
-  
+
+  .text-balance {
+    text-wrap: balance;
+  }
+
   .animate-text-glow {
     animation: textGlow 2.5s ease-in-out infinite alternate;
   }
@@ -44,4 +118,9 @@
 @keyframes textGlow {
   0% { text-shadow: 0 0 10px rgba(236,168,214,0.2), 0 0 20px rgba(236,168,214,0.1); }
   100% { text-shadow: 0 0 20px rgba(236,168,214,0.8), 0 0 40px rgba(236,168,214,0.4); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .animate-text-glow, .animate-fade-up, .animate-slow-zoom { animation: none; }
 }

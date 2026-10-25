@@ -20,6 +20,8 @@ import ExtraServices from './pages/admin/ExtraServices';
 import Invoices from './pages/admin/Invoices';
 import Employees from './pages/admin/Employees';
 import Complaints from './pages/admin/Complaints';
+import CashRegister from './pages/admin/CashRegister';
+import Account from './pages/admin/Account';
 import ProtectedRoute from './components/ProtectedRoute';
 import { AuthProvider } from './context/AuthContext';
 
@@ -28,16 +30,17 @@ import Privacy from './pages/public/Privacy';
 import ComplaintsBook from './pages/public/ComplaintsBook';
 
 import Checkout from './pages/client/Checkout';
-import PaymentGatewayMock from './pages/client/PaymentGatewayMock';
+import PaymentResult from './pages/client/PaymentResult';
 import ClientReservations from './pages/client/ClientReservations';
 import ClientProfile from './pages/client/ClientProfile';
 import ClientDashboardLayout from './pages/client/ClientDashboardLayout';
 import Navbar from './components/Navbar';
+import ScrollManager from './components/ScrollManager';
 
 // Layout basico para las rutas de cliente que necesiten navbar
 function ClientLayout({ children }) {
   return (
-    <div className="bg-black min-h-screen text-white">
+    <div className="bg-ink-900 min-h-screen text-ivory">
       <Navbar />
       <div className="pt-20 pb-10 min-h-screen">
         {children}
@@ -49,6 +52,7 @@ function ClientLayout({ children }) {
 function App() {
   return (
     <Router>
+      <ScrollManager />
       <AuthProvider>
       <Routes>
         <Route path="/" element={<Landing />} />
@@ -70,8 +74,8 @@ function App() {
             <Route path="/client/reservations" element={<ClientReservations />} />
             <Route path="/client/profile" element={<ClientProfile />} />
           </Route>
-          {/* El Gateway simulado se accede logueado (simulando que esta en un frame externo) */}
-          <Route path="/payment-gateway" element={<PaymentGatewayMock />} />
+          {/* Mercado Pago redirige aqui (back_urls) al terminar el pago */}
+          <Route path="/payment/result" element={<ClientLayout><PaymentResult /></ClientLayout>} />
         </Route>
 
         {/* Admin Routes */}
@@ -89,6 +93,8 @@ function App() {
             <Route path="personal" element={<Employees />} />
             <Route path="comodidades" element={<Amenities />} />
             <Route path="reclamaciones" element={<Complaints />} />
+            <Route path="caja" element={<CashRegister />} />
+            <Route path="cuenta" element={<Account />} />
           </Route>
         </Route>
       </Routes>

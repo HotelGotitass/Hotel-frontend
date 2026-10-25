@@ -21,12 +21,19 @@ export const apiClient = async (endpoint, options = {}) => {
     headers,
   });
 
-  if (response.status === 401) {
-    // Token expiro o es invalido
+  if (response.status === 401 && token) {
+    // Token expirado, invalido, cuenta deshabilitada o sesion cerrada por el admin:
+    // se guarda el motivo para mostrarlo en el login y se cierra la sesion local.
+    const data = await response.clone().json().catch(() => ({}));
+    const message = data.message && !data.message.startsWith('No autorizado')
+      ? data.message
+      : 'Tu sesión expiró. Inicia sesión nuevamente.';
+    sessionStorage.setItem('authMessage', message);
     localStorage.removeItem('token');
     localStorage.removeItem('role');
-    window.location.href = '/login';
-    throw new Error('Sesión expirada. Por favor inicie sesión nuevamente.');
+    localStorage.removeItem('email');
+    if (window.location.pathname !== '/login') window.location.href = '/login';
+    throw new Error(message);
   }
 
   return response;

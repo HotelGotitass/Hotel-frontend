@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, NavLink } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../context/AuthContext';
-import { Menu, X, Hotel } from 'lucide-react';
+import { Menu, X } from 'lucide-react';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -11,123 +11,111 @@ export default function Navbar() {
   const { user, logout } = useAuth();
 
   useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 20);
-    };
-    window.addEventListener('scroll', handleScroll);
+    const handleScroll = () => setIsScrolled(window.scrollY > 20);
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const changeLanguage = (lng) => {
-    i18n.changeLanguage(lng);
-  };
+  // Bloquear scroll del body con el menu movil abierto
+  useEffect(() => {
+    document.body.style.overflow = mobileOpen ? 'hidden' : '';
+    return () => { document.body.style.overflow = ''; };
+  }, [mobileOpen]);
+
+  const isEn = i18n.language?.startsWith('en');
+  const accountLink = user
+    ? (user.role === 'CLIENT'
+        ? { to: '/client/reservations', label: t('nav.my_reservations') }
+        : { to: '/admin/recepcion', label: t('nav.admin_panel') })
+    : { to: '/login', label: t('nav.login') };
+
+  const linkCls = ({ isActive }) =>
+    `relative text-[13px] tracking-wide transition-colors ${isActive ? 'text-ivory' : 'text-ivory/65 hover:text-ivory'}`;
+
+  const LangSwitch = ({ className = '' }) => (
+    <div className={`flex items-center gap-1 text-xs ${className}`} role="group" aria-label="Idioma / Language">
+      {['es', 'en'].map((lng) => {
+        const active = lng === 'en' ? isEn : !isEn;
+        return (
+          <button
+            key={lng}
+            onClick={() => i18n.changeLanguage(lng)}
+            aria-pressed={active}
+            className={`w-8 h-8 rounded-full uppercase transition-colors ${active ? 'bg-ivory/10 text-ivory font-semibold' : 'text-ivory/50 hover:text-ivory'}`}
+          >
+            {lng}
+          </button>
+        );
+      })}
+    </div>
+  );
 
   return (
-    <nav className={"fixed w-full z-50 transition-all duration-500 " + (isScrolled ? 'glass-nav py-4 bg-black/90 shadow-md border-b border-white/10' : 'bg-transparent py-6')}>
-      <div className="max-w-[1400px] mx-auto px-6 lg:px-8">
-        <div className="flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3"><img src="/logo.png" alt="Gotitas Logo" className="h-8 object-contain" />
-            <span className="text-xl font-bold tracking-tight text-white uppercase">
-              GOTITAS
-            </span>
+    <nav className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${isScrolled || mobileOpen ? 'glass-nav py-3' : 'bg-gradient-to-b from-ink-900/70 to-transparent py-5'}`}>
+      <div className="max-w-[1400px] mx-auto px-5 lg:px-10 grid grid-cols-[1fr_auto_1fr] items-center gap-4">
+        <div className="hidden md:flex items-center gap-8">
+          <NavLink to="/habitaciones" className={linkCls}>{t('nav.rooms')}</NavLink>
+          <Link to="/#experiencia" className="text-[13px] tracking-wide text-ivory/65 hover:text-ivory transition-colors">
+            {t('nav.experience')}
           </Link>
-          
-          {/* Desktop nav */}
-          <div className="hidden md:flex items-center gap-10">
-            <Link to="/#experiencia" className="text-sm text-white/80 hover:text-white transition-colors">
-              {t('nav.experience')}
-            </Link>
-            <Link to="/habitaciones" className="text-sm text-white/80 hover:text-white transition-colors">
-              {t('nav.rooms')}
-            </Link>
-          </div>
+        </div>
+        <button
+          className="md:hidden justify-self-start w-11 h-11 -ml-2 flex items-center justify-center text-ivory"
+          onClick={() => setMobileOpen(!mobileOpen)}
+          aria-label={mobileOpen ? t('nav.close_menu') : t('nav.open_menu')}
+          aria-expanded={mobileOpen}
+        >
+          {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+        </button>
 
-          <div className="flex items-center gap-4">
-            {/* Language switcher */}
-            <div className="flex items-center gap-2 text-white/60 text-sm">
-              <button
-                onClick={() => changeLanguage('es')}
-                className={i18n.language === 'es' ? 'text-white font-bold' : 'hover:text-white transition-colors'}
-              >
-                ES
-              </button>
-              <span>|</span>
-              <button
-                onClick={() => changeLanguage('en')}
-                className={i18n.language.startsWith('en') ? 'text-white font-bold' : 'hover:text-white transition-colors'}
-              >
-                EN
-              </button>
-            </div>
-            
-            {/* Auth links */}
-            {user ? (
-              <>
-                {user.role === 'CLIENT' ? (
-                  <Link to="/client/reservations" className="text-sm text-white/80 hover:text-white transition-colors hidden md:block">
-                    {t('nav.my_reservations')}
-                  </Link>
-                ) : (
-                  <Link to="/admin/recepcion" className="text-sm text-white/80 hover:text-white transition-colors hidden md:block">
-                    {t('nav.admin_panel')}
-                  </Link>
-                )}
-                <button onClick={logout} className="text-sm text-red-300 hover:text-red-100 transition-colors">
-                  {t('nav.logout')}
-                </button>
-              </>
-            ) : (
-              <Link to="/login" className="hidden md:block text-sm text-white/80 hover:text-white transition-colors">
-                {t('nav.login')}
-              </Link>
-            )}
-            
-            <Link to="/habitaciones" className="px-6 py-2 bg-white text-black text-sm font-medium rounded-full hover:bg-white/90 transition-colors">
-              {t('nav.book')}
-            </Link>
+        <Link to="/" className="flex items-center gap-2.5 justify-self-center" onClick={() => setMobileOpen(false)}>
+          <img src="/logo.png" alt="" className="h-7 object-contain" />
+          <span className="font-display text-2xl font-semibold tracking-[0.12em] text-ivory uppercase">Gotitas</span>
+        </Link>
 
-            {/* Mobile menu button */}
-            <button
-              className="md:hidden text-white/80 hover:text-white"
-              onClick={() => setMobileOpen(!mobileOpen)}
-            >
-              {mobileOpen ? <X size={22} /> : <Menu size={22} />}
+        <div className="flex items-center justify-end gap-2 md:gap-5">
+          <LangSwitch className="hidden md:flex" />
+          <NavLink to={accountLink.to} className={(s) => `hidden md:block ${linkCls(s)}`}>{accountLink.label}</NavLink>
+          {user && (
+            <button onClick={logout} className="hidden md:block text-[13px] text-ivory/50 hover:text-accent transition-colors">
+              {t('nav.logout')}
             </button>
+          )}
+          <Link to="/habitaciones" className="btn-primary min-h-[40px] py-2 px-5 text-[13px]">
+            {t('nav.book')}
+          </Link>
+        </div>
+      </div>
+
+      {mobileOpen && (
+        <div className="md:hidden fixed inset-x-0 top-[68px] bottom-0 bg-ink-900 px-6 py-10 flex flex-col animate-fade-up">
+          <div className="flex flex-col gap-1">
+            {[
+              { to: '/habitaciones', label: t('nav.rooms') },
+              { to: '/#experiencia', label: t('nav.experience') },
+              accountLink,
+            ].map((item) => (
+              <Link
+                key={item.to}
+                to={item.to}
+                onClick={() => setMobileOpen(false)}
+                className="font-display text-4xl py-3 border-b border-ivory/10 text-ivory"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </div>
+          <div className="mt-auto flex items-center justify-between">
+            <LangSwitch />
+            {user && (
+              <button onClick={() => { logout(); setMobileOpen(false); }} className="text-sm text-accent min-h-[44px]">
+                {t('nav.logout')}
+              </button>
+            )}
           </div>
         </div>
-
-        {/* Mobile menu */}
-        {mobileOpen && (
-          <div className="md:hidden mt-4 pb-4 border-t border-white/10 pt-4 flex flex-col gap-3">
-            <Link to="/#experiencia" className="text-sm text-white/80" onClick={() => setMobileOpen(false)}>
-              {t('nav.experience')}
-            </Link>
-            <Link to="/habitaciones" className="text-sm text-white/80" onClick={() => setMobileOpen(false)}>
-              {t('nav.rooms')}
-            </Link>
-            {user ? (
-              <>
-                {user.role === 'CLIENT' ? (
-                  <Link to="/client/reservations" className="text-sm text-white/80" onClick={() => setMobileOpen(false)}>
-                    {t('nav.my_reservations')}
-                  </Link>
-                ) : (
-                  <Link to="/admin/recepcion" className="text-sm text-white/80" onClick={() => setMobileOpen(false)}>
-                    {t('nav.admin_panel')}
-                  </Link>
-                )}
-                <button onClick={() => { logout(); setMobileOpen(false); }} className="text-sm text-red-300 text-left">
-                  {t('nav.logout')}
-                </button>
-              </>
-            ) : (
-              <Link to="/login" className="text-sm text-white/80" onClick={() => setMobileOpen(false)}>
-                {t('nav.login')}
-              </Link>
-            )}
-          </div>
-        )}
-      </div>
+      )}
     </nav>
   );
 }

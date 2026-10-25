@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { apiClient } from '../../utils/apiClient';
 import { Clock, CheckCircle, AlertTriangle } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import PaymentModal, { REFUND_METHODS } from '../../components/admin/PaymentModal';
 
 export default function Refunds() {
   const { t } = useTranslation();
@@ -24,19 +26,22 @@ export default function Refunds() {
     }
   };
 
-  const handleProcessRefund = async (id) => {
-    if (!window.confirm(t('refunds.confirm_process'))) return;
-    try {
-      const res = await apiClient(`/admin/refunds/${id}/process`, { method: 'POST' });
-      if (res.ok) {
-        fetchRefunds();
-      } else {
-        const data = await res.json();
-        alert(data.message || t('refunds.process_error'));
-      }
-    } catch (err) {
-      alert(t('common.error'));
-    }
+  const [processing, setProcessing] = useState(null);
+  const [notice, setNotice] = useState('');
+
+  // El reembolso en efectivo sale de la caja abierta (egreso); los demas medios no tocan el cajon
+  const handleProcessRefund = async ({ method, reference }) => {
+    const res = await apiClient(`/admin/refunds/${processing.id}/process`, {
+      method: 'POST',
+      body: JSON.stringify({ method, reference }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || t('refunds.process_error'));
+    setNotice(method === 'CASH'
+      ? t('refunds.done_cash', { amount: Number(processing.amount).toFixed(2) })
+      : t('refunds.done_other', { method: t(`payments.methods.${method}`) }));
+    setProcessing(null);
+    fetchRefunds();
   };
 
   return (
@@ -44,6 +49,12 @@ export default function Refunds() {
       <div className="flex justify-between items-center mb-6">
         <h2 className="text-2xl font-bold">{t('refunds.title')}</h2>
       </div>
+
+      {notice && (
+        <div role="status" className="rounded-xl border border-green-500/40 bg-green-500/10 px-4 py-3 text-sm text-green-300">
+          {notice} <Link to="/admin/caja" className="underline ml-1">{t('cash.title')}</Link>
+        </div>
+      )}
 
       <div className="bg-[#111] rounded-xl border border-white/10 overflow-hidden">
         <table className="w-full text-left">
@@ -54,6 +65,7 @@ export default function Refunds() {
               <th className="p-4">{t('refunds.amount')}</th>
               <th className="p-4">{t('refunds.reason')}</th>
               <th className="p-4">{t('refunds.status')}</th>
+              <th className="p-4">{t('refunds.method')}</th>
               <th className="p-4">{t('refunds.processed_by')}</th>
               <th className="p-4 text-right">{t('refunds.actions')}</th>
             </tr>
@@ -76,11 +88,15 @@ export default function Refunds() {
                     </span>
                   )}
                 </td>
+                <td className="p-4 text-xs text-white/70">
+                  {ref.method ? t(`payments.methods.${ref.method}`) : '-'}
+                  {ref.reference && <div className="text-white/40 font-mono">{ref.reference}</div>}
+                </td>
                 <td className="p-4 text-xs text-white/50">{ref.processedBy || '-'}</td>
                 <td className="p-4 text-right">
                   {ref.status === 'REQUESTED' && (
                     <button 
-                      onClick={() => handleProcessRefund(ref.id)}
+                      onClick={() => { setNotice(''); setProcessing(ref); }}
                       className="bg-[#eca8d6] text-black px-3 py-1.5 rounded-lg text-xs font-bold hover:bg-white transition-colors"
                     >
                       {t('refunds.mark_processed')}
@@ -91,7 +107,7 @@ export default function Refunds() {
             ))}
             {refunds.length === 0 && !loading && (
               <tr>
-                <td colSpan="7" className="p-12 text-center text-white/50 flex flex-col items-center justify-center">
+                <td colSpan="8" className="p-12 text-center text-white/50 flex flex-col items-center justify-center">
                   <AlertTriangle size={32} className="mb-3 opacity-40" />
                   {t('refunds.no_refunds')}
                 </td>
@@ -99,12 +115,26 @@ export default function Refunds() {
             )}
             {loading && (
               <tr>
-                <td colSpan="7" className="p-12 text-center text-white/50">{t('common.loading')}</td>
+                <td colSpan="8" className="p-12 text-center text-white/50">{t('common.loading')}</td>
               </tr>
             )}
           </tbody>
         </table>
       </div>
+
+      {processing && (
+        <PaymentModal
+          title={t('refunds.process_title')}
+          subtitle={`${processing.bookingCode} · S/ ${Number(processing.amount).toFixed(2)}`}
+          editableAmount={false}
+          methods={REFUND_METHODS}
+          methodLabel={t('refunds.refund_method')}
+          submitLabel={t('refunds.mark_processed')}
+          hint={(m) => (m === 'CASH' ? t('refunds.hint_cash') : m === 'MERCADO_PAGO' ? t('refunds.hint_mp') : t('refunds.hint_other'))}
+          onSubmit={handleProcessRefund}
+          onClose={() => setProcessing(null)}
+        />
+      )}
     </div>
   );
 }

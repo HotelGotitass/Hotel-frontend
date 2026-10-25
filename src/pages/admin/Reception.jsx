@@ -1,7 +1,10 @@
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, FileText, CheckCircle } from 'lucide-react';
-import { apiClient, BASE_URL } from '../../utils/apiClient';
+import { Search, FileText, CheckCircle, Banknote } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import PaymentModal from '../../components/admin/PaymentModal';
+import { apiClient } from '../../utils/apiClient';
+import { downloadPdfResponse } from '../../utils/download';
 
 export default function Reception() {
   const { t } = useTranslation();
@@ -9,10 +12,30 @@ export default function Reception() {
   const [reservation, setReservation] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [paying, setPaying] = useState(false);
+  const [notice, setNotice] = useState('');
+
+  const refresh = async (code) => {
+    const res = await apiClient('/reservations/code/' + code);
+    if (res.ok) setReservation(await res.json());
+  };
+
+  const handlePayment = async ({ amount, method, reference }) => {
+    const res = await apiClient(`/reservations/${reservation.id}/payments`, {
+      method: 'POST',
+      body: JSON.stringify({ amount, method, reference }),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.message || t('common.error'));
+    setPaying(false);
+    setNotice(t('payments.registered', { amount: Number(data.amount).toFixed(2), balance: Number(data.balanceDue).toFixed(2) }));
+    await refresh(reservation.bookingCode);
+  };
 
   const handleSearch = async (e) => {
     e.preventDefault();
     if (!bookingCode) return;
+    setNotice('');
 
     setLoading(true);
     setError('');
@@ -38,29 +61,14 @@ export default function Reception() {
       const res = await apiClient('/invoices/reservation/' + reservationId);
       if (res.ok) {
         const invoice = await res.json();
-        const token = localStorage.getItem('token');
-        
-        // Fetch the PDF as blob instead of opening in a new tab (requires Bearer token which window.open doesn't send)
-        const pdfRes = await fetch(`${BASE_URL}/invoices/${invoice.id}/pdf`, {
-          headers: { 'Authorization': `Bearer ${token}` }
-        });
-        
-        if (!pdfRes.ok) throw new Error();
-        
-        const blob = await pdfRes.blob();
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `Factura_${invoice.id}.pdf`;
-        document.body.appendChild(a);
-        a.click();
-        window.URL.revokeObjectURL(url);
-        document.body.removeChild(a);
+        // Se descarga como blob porque el endpoint requiere el Bearer token (window.open no lo envia)
+        const pdfRes = await apiClient(`/invoices/${invoice.id}/pdf`, { headers: { Accept: 'application/pdf' } });
+        await downloadPdfResponse(pdfRes, `${invoice.number || 'Comprobante_' + invoice.id}.pdf`);
       } else {
         alert(t('reception.invoice_error'));
       }
     } catch (err) {
-      alert(t('reception.invoice_fetch_error'));
+      alert(err.message || t('reception.invoice_fetch_error'));
     }
   };
 
@@ -128,8 +136,18 @@ export default function Reception() {
             <div>
               <p className="text-sm text-white/50 mb-1">{t('reception.total_label')}</p>
               <p className="font-bold text-2xl text-[#eca8d6]">S/ {reservation.totalPrice?.toFixed(2)}</p>
+              <p className="text-xs text-white/50 mt-1">
+                {t('payments.paid')}: S/ {Number(reservation.amountPaid || 0).toFixed(2)} · {t('payments.balance')}: S/ {Number(reservation.balanceDue || 0).toFixed(2)}
+              </p>
+              {reservation.guests && <p className="text-xs text-white/40">{t('publicRooms.guests_count', { count: reservation.guests })}</p>}
             </div>
           </div>
+
+          {notice && (
+            <div role="status" className="mb-6 rounded-xl border border-green-500/40 bg-green-500/10 px-4 py-3 text-sm text-green-300">
+              {notice} <Link to="/admin/caja" className="underline ml-1">{t('cash.title')}</Link>
+            </div>
+          )}
 
           <div className="flex gap-4 pt-6 border-t border-white/10">
             {reservation.status === 'CONFIRMED' && (
@@ -141,6 +159,15 @@ export default function Reception() {
                 {t('reception.checkin_btn')}
               </button>
             )}
+            {reservation.status !== 'CANCELLED' && (
+              <button
+                onClick={() => setPaying(true)}
+                className="flex items-center gap-2 bg-[#eca8d6] text-black px-6 py-3 rounded-xl hover:bg-white transition-colors font-semibold"
+              >
+                <Banknote size={20} />
+                {t('payments.register_payment')}
+              </button>
+            )}
             <button
               onClick={() => handleDownloadInvoice(reservation.id)}
               className="flex items-center gap-2 border border-white/20 bg-white/5 text-white/80 px-6 py-3 rounded-xl hover:bg-white/10 transition-colors font-semibold"
@@ -150,6 +177,16 @@ export default function Reception() {
             </button>
           </div>
         </div>
+      )}
+
+      {paying && reservation && (
+        <PaymentModal
+          title={t('payments.register_payment')}
+          subtitle={`${reservation.bookingCode} · ${reservation.guestName}`}
+          defaultAmount={reservation.balanceDue > 0 ? reservation.balanceDue : ''}
+          onSubmit={handlePayment}
+          onClose={() => setPaying(false)}
+        />
       )}
     </div>
   );
