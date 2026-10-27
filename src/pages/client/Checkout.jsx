@@ -3,7 +3,8 @@ import { Helmet } from 'react-helmet';
 import { AlertCircle, ShieldCheck, Lock, Check } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import { apiClient } from '../../utils/apiClient';
-import { DEPOSIT_PERCENTAGE, formatMoney, nightsBetween, startMercadoPagoPayment } from '../../utils/payments';
+import { formatMoney, nightsBetween, usePaymentConfig } from '../../utils/payments';
+import MercadoPagoBrick from '../../components/MercadoPagoBrick';
 import { useTranslation } from 'react-i18next';
 
 export default function Checkout() {
@@ -16,6 +17,9 @@ export default function Checkout() {
   const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showBrick, setShowBrick] = useState(false);
+  // Anticipo y Public Key vienen del backend; null = no se pudo cargar
+  const config = usePaymentConfig();
 
   useEffect(() => {
     const data = sessionStorage.getItem('bookingDetails');
@@ -28,7 +32,8 @@ export default function Checkout() {
     if (created) setReservation(JSON.parse(created));
   }, [navigate]);
 
-  const handlePay = async () => {
+  // Crea (una sola vez) la reserva y muestra el formulario de Mercado Pago
+  const handleContinue = async () => {
     setLoading(true);
     setError('');
     try {
@@ -49,16 +54,15 @@ export default function Checkout() {
         setReservation(data);
         sessionStorage.setItem('checkoutReservation', JSON.stringify(data));
       }
-      await startMercadoPagoPayment(current.id, option);
-      sessionStorage.removeItem('bookingDetails');
-      sessionStorage.removeItem('checkoutReservation');
+      setShowBrick(true);
     } catch (err) {
       setError(err.message || t('checkout.create_error'));
+    } finally {
       setLoading(false);
     }
   };
 
-  if (!bookingData) return (
+  if (!bookingData || config === undefined) return (
     <div className="flex items-center justify-center min-h-[60vh]">
       <p className="text-ivory/60">{t('common.loading')}</p>
     </div>
@@ -68,11 +72,11 @@ export default function Checkout() {
   const total = reservation ? Number(reservation.totalPrice) : bookingData.basePrice * nights;
   const deposit = reservation?.depositAmount != null
     ? Number(reservation.depositAmount)
-    : Math.round(total * DEPOSIT_PERCENTAGE) / 100;
+    : Math.round(total * Number(config?.depositPercentage ?? 100)) / 100;
   const payNow = option === 'DEPOSIT' ? deposit : total;
 
   const options = [
-    { id: 'DEPOSIT', title: t('checkout.option_deposit', { pct: DEPOSIT_PERCENTAGE }), amount: deposit, hint: t('checkout.option_deposit_hint', { amount: formatMoney(total - deposit) }) },
+    { id: 'DEPOSIT', title: t('checkout.option_deposit', { pct: config?.depositPercentage ?? 100 }), amount: deposit, hint: t('checkout.option_deposit_hint', { amount: formatMoney(total - deposit) }) },
     { id: 'FULL', title: t('checkout.option_full'), amount: total, hint: t('checkout.option_full_hint') },
   ];
 
@@ -194,10 +198,21 @@ export default function Checkout() {
                 </span>
               </label>
 
-              <button onClick={handlePay} disabled={loading || !acceptedTerms} className="btn-dark w-full mt-2 py-4 text-base">
-                <Lock size={16} />
-                {loading ? t('client.processing') : t('checkout.pay_with_mp')}
-              </button>
+              {showBrick && reservation ? (
+                <div className="pt-4">
+                  <MercadoPagoBrick
+                    reservationId={reservation.id}
+                    option={option}
+                    amount={payNow}
+                    onError={setError}
+                  />
+                </div>
+              ) : (
+                <button onClick={handleContinue} disabled={loading || !acceptedTerms || !config?.publicKey} className="btn-dark w-full mt-2 py-4 text-base">
+                  <Lock size={16} />
+                  {loading ? t('client.processing') : t('checkout.pay_with_mp')}
+                </button>
+              )}
 
               <p className="flex items-start gap-2 text-xs text-ink-900/50 pt-1">
                 <ShieldCheck size={14} className="shrink-0 mt-0.5" />

@@ -127,7 +127,6 @@ Plantilla: [`.env.example`](.env.example). Los `.env` reales están en `.gitigno
 | Variable | Descripción | Ejemplo |
 |:--|:--|:--|
 | `VITE_API_BASE_URL` | URL de la API | `http://localhost:8080/api/v1` |
-| `VITE_DEPOSIT_PERCENTAGE` | Anticipo mostrado en el checkout (igual al backend) | `50` |
 <!-- /AUTO-GENERATED -->
 
 ## Scripts

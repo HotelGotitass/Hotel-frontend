@@ -1,6 +1,5 @@
-import { apiClient } from './apiClient';
-
-export const DEPOSIT_PERCENTAGE = Number(import.meta.env.VITE_DEPOSIT_PERCENTAGE || 50);
+import { useEffect, useState } from 'react';
+import { BASE_URL } from './apiClient';
 
 export const formatMoney = (value) => `S/ ${Number(value || 0).toFixed(2)}`;
 
@@ -10,18 +9,29 @@ export const nightsBetween = (checkIn, checkOut) => {
   return Math.max(0, Math.round(diff / 86400000));
 };
 
-/**
- * Crea la preferencia de Mercado Pago en el backend y redirige al Checkout Pro.
- * option: 'DEPOSIT' | 'FULL' | 'BALANCE'
- */
-export async function startMercadoPagoPayment(reservationId, option) {
-  const res = await apiClient(`/client/reservations/${reservationId}/payment-preference`, {
-    method: 'POST',
-    body: JSON.stringify({ option }),
-  });
-  const data = await res.json().catch(() => ({}));
-  if (!res.ok || !data.initPoint) {
-    throw new Error(data.message || 'No se pudo iniciar el pago con Mercado Pago');
-  }
-  window.location.assign(data.initPoint);
+// Configuracion de pagos del backend ({ publicKey, depositPercentage }); se pide una sola vez.
+// El frontend no guarda credenciales ni reglas de negocio: todo sale del backend.
+let configPromise;
+export function loadPaymentConfig() {
+  configPromise ??= fetch(`${BASE_URL}/public/payments/config`)
+    .then((res) => {
+      if (!res.ok) throw new Error('config');
+      return res.json();
+    })
+    .catch(() => {
+      configPromise = undefined;
+      return null;
+    });
+  return configPromise;
+}
+
+/** Devuelve la configuracion de pagos, o undefined mientras carga y null si fallo. */
+export function usePaymentConfig() {
+  const [config, setConfig] = useState(undefined);
+  useEffect(() => {
+    let active = true;
+    loadPaymentConfig().then((c) => { if (active) setConfig(c); });
+    return () => { active = false; };
+  }, []);
+  return config;
 }

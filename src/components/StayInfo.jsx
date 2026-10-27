@@ -2,14 +2,15 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight } from 'lucide-react';
-import { DEPOSIT_PERCENTAGE } from '../utils/payments';
+import { usePaymentConfig } from '../utils/payments';
 
 // Reglas que el backend aplica de verdad (anticipo, ventana de pago, modificacion de fechas)
 export default function StayInfo() {
   const { t } = useTranslation();
+  const config = usePaymentConfig();
   const items = [
     { title: t('home.info_hold_t'), desc: t('home.info_hold_d') },
-    { title: t('home.info_deposit_t', { pct: DEPOSIT_PERCENTAGE }), desc: t('home.info_deposit_d') },
+    { title: t('home.info_deposit_t', { pct: config?.depositPercentage ?? '…' }), desc: t('home.info_deposit_d') },
     { title: t('home.info_secure_t'), desc: t('home.info_secure_d') },
     { title: t('home.info_modify_t'), desc: t('home.info_modify_d') },
   ];

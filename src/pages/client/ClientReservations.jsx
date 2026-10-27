@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { apiClient } from '../../utils/apiClient';
-import { formatMoney, startMercadoPagoPayment } from '../../utils/payments';
+import { formatMoney } from '../../utils/payments';
+import MercadoPagoBrick from '../../components/MercadoPagoBrick';
 import { downloadPdfResponse } from '../../utils/download';
 import { Calendar, CheckCircle, XCircle, Clock, AlertTriangle, FileText, Edit2, CreditCard, X } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
@@ -55,7 +56,8 @@ export default function ClientReservations() {
   const [loading, setLoading] = useState(true);
   const [notice, setNotice] = useState(null);
   const [payingRes, setPayingRes] = useState(null);
-  const [payLoading, setPayLoading] = useState(false);
+  // Opcion elegida en el modal: con ella se muestra el formulario de Mercado Pago
+  const [payOption, setPayOption] = useState(null);
   const [showModifyModal, setShowModifyModal] = useState(false);
   const [selectedResForModify, setSelectedResForModify] = useState(null);
   const [newDates, setNewDates] = useState({ checkIn: '', checkOut: '' });
@@ -95,15 +97,14 @@ export default function ClientReservations() {
     }
   };
 
-  const handlePay = async (reservationId, option) => {
-    setPayLoading(true);
-    try {
-      await startMercadoPagoPayment(reservationId, option);
-    } catch (err) {
-      setNotice({ type: 'error', text: err.message });
-      setPayingRes(null);
-      setPayLoading(false);
-    }
+  const handlePay = (reservation, option) => {
+    setPayingRes(reservation);
+    setPayOption(option);
+  };
+
+  const closePayModal = () => {
+    setPayingRes(null);
+    setPayOption(null);
   };
 
   const handleDownloadInvoice = async (reservationId) => {
@@ -206,12 +207,12 @@ export default function ClientReservations() {
 
                   <div className="flex flex-wrap gap-2 mt-auto">
                     {isPending && (
-                      <button onClick={() => setPayingRes(res)} className="text-sm bg-accent text-black px-3 py-1.5 rounded-lg hover:bg-ivory transition-colors font-semibold flex items-center gap-1">
+                      <button onClick={() => handlePay(res, null)} className="text-sm bg-accent text-black px-3 py-1.5 rounded-lg hover:bg-ivory transition-colors font-semibold flex items-center gap-1">
                         <CreditCard size={14} /> {t('client.pay_now')}
                       </button>
                     )}
                     {canPayBalance && (
-                      <button onClick={() => handlePay(res.id, 'BALANCE')} disabled={payLoading} className="text-sm bg-accent text-black px-3 py-1.5 rounded-lg hover:bg-ivory transition-colors font-semibold flex items-center gap-1 disabled:opacity-50">
+                      <button onClick={() => handlePay(res, 'BALANCE')} className="text-sm bg-accent text-black px-3 py-1.5 rounded-lg hover:bg-ivory transition-colors font-semibold flex items-center gap-1 disabled:opacity-50">
                         <CreditCard size={14} /> {t('reservationsPage.pay_balance')}
                       </button>
                     )}
@@ -261,30 +262,37 @@ export default function ClientReservations() {
       {/* Modal elegir monto a pagar */}
       {payingRes && (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4" role="dialog" aria-modal="true">
-          <div className="card p-6 max-w-md w-full">
+          <div className="card p-6 max-w-md w-full max-h-[90vh] overflow-y-auto">
             <h3 className="font-display text-3xl font-semibold mb-1">{t('client.pay_now')}</h3>
             <p className="text-sm text-ivory/50 mb-6">{payingRes.bookingCode} · {payingRes.categoryName}</p>
-            <div className="space-y-3">
-              <button
-                onClick={() => handlePay(payingRes.id, 'DEPOSIT')}
-                disabled={payLoading}
-                className="w-full flex justify-between items-center rounded-2xl border border-ivory/10 hover:border-accent p-4 transition-colors disabled:opacity-50"
-              >
-                <span className="font-semibold">{t('client.deposit')}</span>
-                <span className="font-bold">{formatMoney(Number(payingRes.depositAmount) - Number(payingRes.amountPaid || 0))}</span>
-              </button>
-              <button
-                onClick={() => handlePay(payingRes.id, 'FULL')}
-                disabled={payLoading}
-                className="w-full flex justify-between items-center rounded-2xl border border-ivory/10 hover:border-accent p-4 transition-colors disabled:opacity-50"
-              >
-                <span className="font-semibold">{t('checkout.option_full')}</span>
-                <span className="font-bold">{formatMoney(payingRes.balanceDue)}</span>
-              </button>
-            </div>
+            {payOption ? (
+              <MercadoPagoBrick
+                reservationId={payingRes.id}
+                option={payOption}
+                amount={payOption === 'DEPOSIT' ? Number(payingRes.depositAmount) - Number(payingRes.amountPaid || 0) : Number(payingRes.balanceDue)}
+                onError={(text) => setNotice({ type: 'error', text })}
+              />
+            ) : (
+              <div className="space-y-3">
+                <button
+                  onClick={() => setPayOption('DEPOSIT')}
+                  className="w-full flex justify-between items-center rounded-2xl border border-ivory/10 hover:border-accent p-4 transition-colors"
+                >
+                  <span className="font-semibold">{t('client.deposit')}</span>
+                  <span className="font-bold">{formatMoney(Number(payingRes.depositAmount) - Number(payingRes.amountPaid || 0))}</span>
+                </button>
+                <button
+                  onClick={() => setPayOption('FULL')}
+                  className="w-full flex justify-between items-center rounded-2xl border border-ivory/10 hover:border-accent p-4 transition-colors"
+                >
+                  <span className="font-semibold">{t('checkout.option_full')}</span>
+                  <span className="font-bold">{formatMoney(payingRes.balanceDue)}</span>
+                </button>
+              </div>
+            )}
             <p className="text-xs text-ivory/40 mt-4">{t('checkout.mp_notice')}</p>
-            <button onClick={() => setPayingRes(null)} disabled={payLoading} className="btn-ghost w-full mt-5 py-2">
-              {payLoading ? t('client.processing') : t('client.btn_cancel')}
+            <button onClick={closePayModal} className="btn-ghost w-full mt-5 py-2">
+              {t('client.btn_cancel')}
             </button>
           </div>
         </div>

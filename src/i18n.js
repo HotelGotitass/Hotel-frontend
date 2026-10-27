@@ -186,10 +186,31 @@ const resources = {
         "option_full_hint": "Llega y disfruta, sin saldos pendientes.",
         "pay_now": "Pagas hoy",
         "pay_later": "Saldo pendiente",
-        "pay_with_mp": "Pagar con Mercado Pago",
-        "mp_notice": "Serás redirigido a Mercado Pago para completar el pago de forma segura. La habitación queda apartada por 15 minutos.",
+        "pay_with_mp": "Continuar al pago",
+        "mp_notice": "El pago lo procesa Mercado Pago de forma segura; tus datos de tarjeta no pasan por nuestros servidores. La habitación queda apartada por 15 minutos.",
+        "mp_not_configured": "El pago en línea no está disponible en este momento.",
+        "payment_error": "No se pudo procesar el pago. Intenta nuevamente.",
+        "payment_rejected": "Mercado Pago rechazó el pago. Revisa los datos o prueba con otra tarjeta.",
         "create_error": "No se pudo crear la reserva",
         "see_reservation": "Ver la reserva en Mis Reservas para reintentar el pago"
+      },
+
+      "legal": {
+        "docs_label": "Documentos legales",
+        "eyebrow": "Documento legal",
+        "essentials": "Lo esencial",
+        "updated": "Última actualización",
+        "reading": "Lectura",
+        "reading_min": "{{count}} min",
+        "version": "Versión",
+        "print": "Imprimir o guardar PDF",
+        "contents": "Contenido",
+        "sections_count": "{{count}} secciones",
+        "questions": "¿Dudas sobre este documento?",
+        "write_us": "Escríbenos y te respondemos con gusto.",
+        "complaints": "Libro de Reclamaciones",
+        "read_also": "Lee también",
+        "back_top": "Volver arriba"
       },
 
       "paymentResult": {
@@ -847,10 +868,31 @@ const resources = {
         "option_full_hint": "Arrive and relax, nothing left to pay.",
         "pay_now": "Due today",
         "pay_later": "Remaining balance",
-        "pay_with_mp": "Pay with Mercado Pago",
-        "mp_notice": "You will be redirected to Mercado Pago to pay securely. The room is held for 15 minutes.",
+        "pay_with_mp": "Continue to payment",
+        "mp_notice": "Payment is processed securely by Mercado Pago; your card details never touch our servers. The room is held for 15 minutes.",
+        "mp_not_configured": "Online payment is not available right now.",
+        "payment_error": "The payment could not be processed. Please try again.",
+        "payment_rejected": "Mercado Pago declined the payment. Check your details or try another card.",
         "create_error": "Could not create the reservation",
         "see_reservation": "Open the reservation in My Reservations to retry the payment"
+      },
+
+      "legal": {
+        "docs_label": "Legal documents",
+        "eyebrow": "Legal document",
+        "essentials": "Key points",
+        "updated": "Last updated",
+        "reading": "Reading time",
+        "reading_min": "{{count}} min",
+        "version": "Version",
+        "print": "Print or save as PDF",
+        "contents": "Contents",
+        "sections_count": "{{count}} sections",
+        "questions": "Questions about this document?",
+        "write_us": "Write to us and we'll gladly help.",
+        "complaints": "Complaints Book",
+        "read_also": "Read also",
+        "back_top": "Back to top"
       },
 
       "paymentResult": {
